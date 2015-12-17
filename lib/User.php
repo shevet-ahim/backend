@@ -1,5 +1,7 @@
 <?php 
 class User {
+	public static $info;
+	
 	public static function signup($info) {
 		global $CFG;
 	
@@ -164,20 +166,27 @@ class User {
 			exit;
 		}
 		
-		$res = openssl_pkey_new(array("digest_alg"=>"sha256","private_key_bits"=>512,"private_key_type"=>OPENSSL_KEYTYPE_RSA));
-		openssl_pkey_export($res,$private);
-		$public = openssl_pkey_get_details($res);
-		$public = $public["key"];
 		$nonce = time() * 1000;
+		$iv = bin2hex(mcrypt_create_iv('32',MCRYPT_DEV_RANDOM));
 		
-		$session_id = db_insert('sessions',array('session_key'=>$public,'user_id'=>$result[0]['id'],'nonce'=>$nonce,'session_time'=>date('Y-m-d H:i:s'),'session_start'=>date('Y-m-d H:i:s'),'ip'=>$ip1));
+		$session_id = db_insert('sessions',array('session_key'=>$iv,'user_id'=>$result[0]['id'],'nonce'=>$nonce,'session_time'=>date('Y-m-d H:i:s'),'session_start'=>date('Y-m-d H:i:s'),'ip'=>$ip1));
 		$return = array();
 		$return['session_id'] = $session_id;
-		$return['session_key'] = $private;
+		$return['session_key'] = $iv;
 		$return['status'] = $result[0]['status'];
 		
 		db_delete('site_users_access',$result[0]['id'],'site_user');
 		return $return;
+	}
+	
+	public static function logOut($session_id=false) {
+		if (!($session_id > 0))
+			return false;
+	
+		$session_id = preg_replace("/[^0-9]/", "",$session_id);
+	
+		//self::deleteCache();
+		return db_delete('sessions',$session_id,'session_id');
 	}
 	
 	public static function userExists($email) {
@@ -222,6 +231,10 @@ class User {
 			return false;
 		else
 			return $ip_addresses[0];
+	}
+	
+	public static function setInfo($info) {
+		User::$info = $info;
 	}
 }
 ?>

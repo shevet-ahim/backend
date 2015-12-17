@@ -6,7 +6,7 @@ $system_classes[] = 'DB';
 include '../lib/common.php';
 
 $session_id1 = (!empty($_POST['session_id'])) ? preg_replace("/[^0-9]/","",$_POST['session_id']) : false;
-$signature1 = (!empty($_POST['signature'])) ? hex2bin($_POST['signature']) : false;
+$signature1 = (!empty($_POST['signature'])) ? $_POST['signature'] : false;
 $nonce1 = (!empty($_POST['nonce'])) ? preg_replace("/[^0-9]/","",$_POST['nonce']) : false;
 $token1 = (!empty($_POST['token'])) ? preg_replace("/[^0-9]/","",$_POST['token']) : false;
 $settings_change_id1 = (!empty($_POST['settings_change_id'])) ? $_REQUEST['settings_change_id'] : false;
@@ -51,21 +51,21 @@ if ($session_id1) {
 		$return['error'] = 'invalid-nonce';
 	}
 	elseif (!empty($result)) {
-		//$awaiting_token = ($result[0]['awaiting'] == 'Y');
-		$hash = hash_hmac('sha256',json_encode($commands,JSON_NUMERIC_CHECK),$result[0]['session_key']);
+		$hash = bin2hex(hash_hmac('sha256',base64_encode(json_encode($commands)),$result[0]['session_key'],true));
 		if ($signature1 == $hash) {
 			User::setInfo($result[0]);
-			$update_nonce = $_POST['update_nonce'];
+			$update_nonce = true;
 			
-			if (User::$info['locked'] == 'Y' || User::$info['deactivated'] == 'Y') {
+			if (User::$info['site_users_status'] != $CFG->user_status_approved) {
 				$CFG->session_locked = true;
 			}
 			else {
 				$CFG->session_active = true;
 			}
-			
+			/*
 			if (empty($CFG->language))
 				$CFG->language = $result[0]['last_lang'];
+				*/
 		}
 		else
 			$return['error'] = 'invalid-signature';
@@ -236,7 +236,6 @@ if (is_array($commands)) {
 						else {
 							$args = array();
 						}
-						
 						$response = call_user_func_array(array($classname,$method),$args);
 						$return[$classname][$method]['results'][] = $response;
 					}
