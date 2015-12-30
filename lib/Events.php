@@ -48,7 +48,8 @@ class Events{
 				event_cats.name AS category,
 				event_cats1.name AS p_category,
 				IF(events_recurrence.key = "recurrent",event_cats.show_in_feed_rec,event_cats.show_in_feed) AS show_in_feed, 
-				sexos.name AS sexo
+				sexos.name AS sexo,
+				"event" AS `type`
 				FROM events
 				LEFT JOIN event_cats ON (event_cats.id = events.event_cat)
 				LEFT JOIN event_cats event_cats1 ON (event_cats.p_id = event_cats1.id)
@@ -95,11 +96,11 @@ class Events{
 		else if ($in_feed)
 			$sql .= ' AND events_recurrence.key != "recurrent" ';
 		
-		$sql .= ' AND DATE(date_end) <= '.date('Y-m-d').' AND is_active = "Y" GROUP BY events.id ORDER BY events.date ASC';
+		$sql .= ' AND (DATE(date_end) >= "'.date('Y-m-d').'" OR DATE(date_end) < "1980-01-01") AND is_active = "Y" GROUP BY events.id ORDER BY events.date ASC';
 		
 		if ($per_page > 0)
 			$sql .= 'LIMIT 0,'.$per_page;
-
+		
 		$result = db_query_array($sql);
 		if ($id > 0 && $result)
 			return $result[0];

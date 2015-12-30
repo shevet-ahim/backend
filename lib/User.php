@@ -174,6 +174,9 @@ class User {
 		$return['session_id'] = $session_id;
 		$return['session_key'] = $iv;
 		$return['status'] = $result[0]['status'];
+		$return['has_children'] = $result[0]['has_children'];
+		$return['age'] = $result[0]['age'];
+		$return['sex'] = $result[0]['sex'];
 		
 		db_delete('site_users_access',$result[0]['id'],'site_user');
 		return $return;

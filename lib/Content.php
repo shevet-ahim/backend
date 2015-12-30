@@ -19,10 +19,10 @@ class Content{
 			$start_date = floor($start_date/1000);
 		if (strlen((string)$end_date) > 10)
 			$end_date = floor($end_date/1000);
-		if (!$start_date)
-			$start_date = time();
 		if (!$end_date)
-			$end_date = strtotime('+ '.$CFG->events_days_ahead.' days',$start_date);
+			$end_date = time();
+		if (!$start_date)
+			$start_date = strtotime('- '.$CFG->events_days_ahead.' days',$end_date);
 		
 		$sql = 'SELECT 
 				content.id, 
@@ -37,7 +37,8 @@ class Content{
 				content.site_users,
 				CONCAT_WS(" ",authors.first_name,authors.last_name) AS author_name,
 				authors.email AS author_email,
-				content.is_popup
+				content.is_popup,
+				"content" AS `type`
 				FROM content
 				LEFT JOIN content_cats ON (content_cats.id = content.content_cat)
 				LEFT JOIN content_torah_types ON (content_torah_types.f_id = content.id)
@@ -74,7 +75,7 @@ class Content{
 			$sql .= ' AND content.id < '.$first_id.' ';
 		
 		$sql .= ' AND ((content.site_users LIKE "%{%" AND content.site_users LIKE "%'.User::$info['first_name'].' '.User::$info['last_name'].'%") OR content.site_users NOT LIKE "%{%")';
-		$sql .= ' AND is_active = "Y" GROUP BY content.id ORDER BY content.date ASC';
+		$sql .= ' AND content.is_active = "Y" GROUP BY content.id ORDER BY content.date ASC';
 		
 		if ($per_page > 0)
 			$sql .= 'LIMIT 0,'.$per_page;
