@@ -100,7 +100,7 @@ class Events{
 		
 		if ($per_page > 0)
 			$sql .= 'LIMIT 0,'.$per_page;
-		
+		error_log(print_r($sql,1),3,ini_get('error_log'));
 		$result = db_query_array($sql);
 		if ($id > 0 && $result)
 			return $result[0];
