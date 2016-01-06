@@ -49,7 +49,8 @@ class Events{
 				event_cats1.name AS p_category,
 				IF(events_recurrence.key = "recurrent",event_cats.show_in_feed_rec,event_cats.show_in_feed) AS show_in_feed, 
 				sexos.name AS sexo,
-				"event" AS `type`
+				"event" AS `type`,
+				CONCAT("events","_",events_files.f_id,"_",events_files.id,"_large.",events_files.ext) AS img
 				FROM events
 				LEFT JOIN event_cats ON (event_cats.id = events.event_cat)
 				LEFT JOIN event_cats event_cats1 ON (event_cats.p_id = event_cats1.id)
@@ -60,6 +61,7 @@ class Events{
 				LEFT JOIN events_age_groups ON (events_age_groups.f_id = events.id)
 				LEFT JOIN age_groups ON (events_age_groups.c_id = age_groups.id)
 				LEFT JOIN sexos ON (sexos.id = events.sexo)
+				LEFT JOIN events_files ON (events.id = events_files.f_id)
 				WHERE 1 ';
 		
 		if (is_array($cats) && count($cats) > 0) {
@@ -100,7 +102,7 @@ class Events{
 		
 		if ($per_page > 0)
 			$sql .= 'LIMIT 0,'.$per_page;
-		error_log(print_r($sql,1),3,ini_get('error_log'));
+
 		$result = db_query_array($sql);
 		if ($id > 0 && $result)
 			return $result[0];

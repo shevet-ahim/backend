@@ -16,6 +16,7 @@ $api_signature1 = (!empty($_POST['api_signature'])) ? preg_replace("/[^0-9a-zA-Z
 $raw_params_json = (!empty($_POST['raw_params_json'])) ? $_POST['raw_params_json'] : false;
 $update_nonce = false;
 $awaiting_token = false;
+$image = (!empty($_REQUEST['image'])) ? preg_replace("/[^0-9a-zA-Z\.\-\_]/","",$_REQUEST['image']) : false;
 
 //$CFG->language = (!empty($_POST['lang']) && in_array(strtolower($_POST['lang']),array('en','es','ru','zh'))) ? strtolower($_POST['lang']) : false;
 $CFG->client_ip = (!empty($_POST['ip'])) ? preg_replace("/[^0-9\.]/","",$_POST['ip']) : false;
@@ -26,6 +27,12 @@ $CFG->session_api = false;
 $CFG->token_verified = false;
 $CFG->email_2fa_verified = false;
 $CFG->unset_cache = false;
+
+// pull images from admin server
+if ($image) {
+	Image::show($image);
+	exit;
+}
 
 // commands is of form array('Class1'=>array('method1'=>array('arg1'=>blah,'arg2'=>bob)));
 $commands = (!empty($_POST['commands'])) ? json_decode($_POST['commands'],true) : false;

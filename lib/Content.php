@@ -36,17 +36,21 @@ class Content{
 				sexos.name AS sexo,
 				content.site_users,
 				CONCAT_WS(" ",authors.first_name,authors.last_name) AS author_name,
+				CONCAT("authors","_",authors_files.f_id,"_",authors_files.id,"_small.",authors_files.ext) AS author_img,
 				authors.email AS author_email,
 				content.is_popup,
-				"content" AS `type`
+				"content" AS `type`,
+				CONCAT("content","_",content_files.f_id,"_",content_files.id,"_large.",content_files.ext) AS img
 				FROM content
 				LEFT JOIN content_cats ON (content_cats.id = content.content_cat)
+				LEFT JOIN content_files ON (content.id = content_files.f_id)
 				LEFT JOIN content_torah_types ON (content_torah_types.f_id = content.id)
 				LEFT JOIN torah_types ON (content_torah_types.c_id = torah_types.id)
 				LEFT JOIN content_age_groups ON (content_age_groups.f_id = content.id)
 				LEFT JOIN age_groups ON (content_age_groups.c_id = age_groups.id)
 				LEFT JOIN sexos ON (sexos.id = content.sexo)
 				LEFT JOIN authors ON (authors.id = content.author)
+				LEFT JOIN authors_files ON (authors.id = authors_files.f_id)
 				WHERE 1 ';
 		
 		if (is_array($topic) && count($topic) > 0) {
