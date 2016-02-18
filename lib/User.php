@@ -48,7 +48,6 @@ class User {
 			return array('errors'=>$errors,'error_fields'=>$error_fields);
 			
 		$pass1 = $info['pass'];
-		$info['user'] = $info['email'];
 		$info['pass'] = Encryption::hash($info['pass']);
 		$info['reg_date'] = date('Y-m-d');
 		unset($info['pass1']);
@@ -65,12 +64,12 @@ class User {
 		$record_id = db_insert('site_users',$info);
 		$info['pass'] = $pass1;
 		$email = SiteEmail::getRecord('register');
-		//Email::send($CFG->contact_email,$info['email'],$email['title'],$CFG->form_email_from,false,$email['content'],$info);
+		Email::send($CFG->contact_email,$info['email'],$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$info);
 
 		if ($CFG->email_notify_new_users) {
 			$email = SiteEmail::getRecord('register-notify');
 			$info['pass'] = false;
-			//Email::send($CFG->contact_email,$CFG->contact_email,$email['title'],$CFG->form_email_from,false,$email['content'],$info);
+			Email::send($CFG->contact_email,$CFG->contact_email,$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$info);
 		}
 		return $status;	
 	}
@@ -86,11 +85,11 @@ class User {
 		$error_fields = array();
 		$invalid_login = false;
 		
-		$user1 = preg_replace("/[^0-9a-zA-Z@\.\!#\$%\&\*+_\~\?\-]/","",$info['user']);
+		$email1 = preg_replace("/[^0-9a-zA-Z@\.\!#\$%\&\*+_\~\?\-]/","",$info['email']);
 		$pass1 = preg_replace($CFG->pass_regex,"",$info['pass']);
 		$ip1 = self::getUserIp();
 		
-		if (!$user1) {
+		if (!$email1) {
 			$errors[] = 'Email en blanco!';
 			$error_fields[] = 'user';
 		}
@@ -100,9 +99,9 @@ class User {
 			$error_fields[] = 'pass';
 		}
 		
-		$result = db_query_array("SELECT site_users.*, site_users_status.key AS status, site_users_access.start AS `start`, site_users_access.last AS `last`, site_users_access.attempts AS attempts FROM site_users LEFT JOIN site_users_status ON (site_users.site_users_status = site_users_status.id) LEFT JOIN site_users_access ON (site_users_access.site_user = site_users.id) WHERE site_users.user = '$user1'");
+		$result = db_query_array("SELECT site_users.*, site_users_status.key AS status, site_users_access.start AS `start`, site_users_access.last AS `last`, site_users_access.attempts AS attempts FROM site_users LEFT JOIN site_users_status ON (site_users.site_users_status = site_users_status.id) LEFT JOIN site_users_access ON (site_users_access.site_user = site_users.id) WHERE site_users.user = '$email1'");
 		if (!$result) {
-			if (mb_strlen($user1) > 2) {
+			if (mb_strlen($email1) > 2) {
 				if ($ip_int) {
 					$timeframe = 15;
 					$sql = 'SELECT COUNT(1) AS login_attempts FROM ip_access_log WHERE login = "Y" AND `timestamp` > DATE_SUB("'.date('Y-m-d H:i:s').'", INTERVAL '.$timeframe.' MINUTE) AND ip = '.$ip_int;
@@ -112,15 +111,15 @@ class User {
 						$attempts = $result[0]['login_attempts'] + 1;
 				}
 		
-				$result = db_query_array("SELECT attempts FROM site_users_catch WHERE site_user = '$user1'");
+				$result = db_query_array("SELECT attempts FROM site_users_catch WHERE site_user = '$email1'");
 				if ($result) {
 					$attempts = ($result[0]['attempts'] + 1 > $attempts) ? $result[0]['attempts'] + 1 : $attempts;
 					$timeout = pow(2,$attempts);
 					$timeout_next = pow(2,$attempts + 1);
-					db_update('site_users_catch',$user1,array('attempts'=>($result[0]['attempts'] + 1)),'site_user');
+					db_update('site_users_catch',$email1,array('attempts'=>($result[0]['attempts'] + 1)),'site_user');
 				}
 				else
-					db_insert('site_users_catch',array('attempts'=>'1','site_user'=>$user1));
+					db_insert('site_users_catch',array('attempts'=>'1','site_user'=>$email1));
 			}
 		
 			$invalid_login = 1;
@@ -141,7 +140,7 @@ class User {
 				if ($attempts == 3) {
 					$CFG->language = ($result[0]['last_lang']) ? $result[0]['last_lang'] : 'en';
 					$email = SiteEmail::getRecord('bruteforce-notify');
-					//Email::send($CFG->support_email,$result[0]['email'],$email['title'],$CFG->form_email_from,false,$email['content'],$result[0]);
+					Email::send($CFG->support_email,$result[0]['email'],$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$result[0]);
 				}
 		
 				db_update('site_users_access',$result[0]['id'],array('attempts'=>$attempts,'last'=>time()),'site_user');
@@ -175,11 +174,96 @@ class User {
 		$return['session_key'] = $iv;
 		$return['status'] = $result[0]['status'];
 		$return['has_children'] = $result[0]['has_children'];
+		$return['push_notifications'] = $result[0]['push_notifications'];
 		$return['age'] = $result[0]['age'];
 		$return['sex'] = $result[0]['sex'];
 		
 		db_delete('site_users_access',$result[0]['id'],'site_user');
 		return $return;
+	}
+	
+	public static function saveSettings($info) {
+		global $CFG;
+
+		if (!$CFG->session_active || !is_array($info))
+			return false;
+		
+		$status = false;
+		$errors = array();
+		$error_fields = array();
+		$invalid_login = false;
+		error_log(print_r($info,1),3,ini_get('error_log'));
+		$info['email'] = preg_replace("/[^0-9a-zA-Z@\.\!#\$%\&\*+_\~\?\-]/","",$info['email']);
+		$info['first_name'] = preg_replace("/[^\pL a-zA-Z0-9@\s\._-]/u", "",$info['first_name']);
+		$info['last_name'] = preg_replace("/[^\pL a-zA-Z0-9@\s\._-]/u", "",$info['last_name']);
+		$info['age'] = preg_replace("/[^0-9]/", "",$info['age']);
+		$info['sex'] = preg_replace("/[^0-9]/", "",$info['sex']);
+		$info['has_children'] = !empty($info['has_children']);
+		$info['push_notifications'] = !empty($info['push_notifications']);
+		
+		if (empty($info['email']) || !Email::verifyAddress($info['email'])) {
+			$errors[] = 'Email no válido.';
+			$error_fields[] = 'email';
+		}
+		if (empty($info['first_name'])) {
+			$errors[] = 'Por favor ingrese su nombre.';
+			$error_fields[] = 'first_name';
+		}
+		if (empty($info['last_name'])) {
+			$errors[] = 'Por favor ingrese su apellido.';
+			$error_fields[] = 'last_name';
+		}
+		
+		if (count($errors) > 0)
+			return array('errors'=>$errors,'error_fields'=>$error_fields);
+		
+		
+		db_update('site_users',User::$info['id'],$info);
+		$email = SiteEmail::getRecord('update-settings');
+		Email::send($CFG->contact_email,$info['email'],$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$info);
+
+		return 'ok';
+	}
+	
+	public static function savePassword($info) {
+		global $CFG;
+	
+		if (!$CFG->session_active || !is_array($info))
+			return false;
+	
+		$status = false;
+		$errors = array();
+		$error_fields = array();
+		$invalid_login = false;
+		
+		$info['pass'] = preg_replace($CFG->pass_regex,'',$info['pass']);
+		$info['pass1'] = preg_replace($CFG->pass_regex,'',$info['pass1']);
+		$info['current_pass'] = preg_replace($CFG->pass_regex,'',$info['current_pass']);
+		
+		$invalid_pass = (!Encryption::verify_hash($info['current_pass'],User::$info['pass']));
+		if ($invalid_pass) {
+			$errors[] = 'Su contraseña actual no es la correcta.';
+			$error_fields[] = 'current_pass';
+		}
+		if (!empty($info['pass']) && $info['pass'] != $info['pass1']) {
+			$errors[] = 'La contraseña no es idéntica a su verificación.';
+			$error_fields[] = 'pass';
+			$error_fields[] = 'pass1';
+		}
+		if (empty($info['pass']) || mb_strlen($info['pass'],'utf-8') < $CFG->pass_min_chars) {
+			$errors[] = 'Su contraseña debe tener más de '.$CFG->pass_min_chars.' caracteres.';
+			$error_fields[] = 'pass';
+		}
+	
+		if (count($errors) > 0)
+			return array('errors'=>$errors,'error_fields'=>$error_fields);
+	
+	
+		db_update('site_users',User::$info['id'],array('pass'=>Encryption::hash($info['pass'])));
+		$email = SiteEmail::getRecord('update-password');
+		Email::send($CFG->contact_email,$info['email'],$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$info);
+	
+		return 'ok';
 	}
 	
 	public static function logOut($session_id=false) {

@@ -51,7 +51,7 @@ if ($session_id1) {
 	if ($cached)
 		$result = array($cached);
 	else
-		$result = db_query_array('SELECT sessions.nonce AS nonce ,sessions.session_key AS session_key, sessions.ip AS ip, sessions.awaiting AS awaiting, site_users.* FROM sessions LEFT JOIN site_users ON (sessions.user_id = site_users.id) WHERE sessions.session_id = '.$session_id1);
+		$result = db_query_array('SELECT sessions.nonce AS nonce, sessions.session_key AS session_key, sessions.ip AS ip, sessions.awaiting AS awaiting, site_users.* FROM sessions LEFT JOIN site_users ON (sessions.user_id = site_users.id) WHERE sessions.session_id = '.$session_id1);
 	
 	$return['session'] = $session_id1;
 	if ($nonce_invalid) {

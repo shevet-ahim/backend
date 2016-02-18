@@ -81,7 +81,7 @@ class Events{
 		if ($day_he > 0 && $month_he > 0)
 			$sql .= ' AND (he_months.key = "'.$month_he.'" AND day_he = '.$day_he.') ';
 		if ($age > 0)
-			$sql .= ' AND ((age_groups.min >= '.$age.' AND age_groups.max <= '.$age.') OR age_groups.min IS NULL) ';
+			$sql .= ' AND (age_groups.min <= '.$age.' AND age_groups.max >= '.$age.') ';
 		if ($sex > 0)
 			$sql .= ' AND (events.sexo = '.$sex.' OR events.sexo = 0) ';
 		if ($id > 0)

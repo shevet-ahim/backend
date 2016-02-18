@@ -32,6 +32,35 @@ class Settings {
 		
 		return $result[0];
 	}
+	
+	public static function getForApp() {
+		global $CFG;
+		
+		$return = array('user'=>array(),'sexos'=>array());
+		
+		$return['user'] = User::$info;
+		unset($return['user']['nonce']);
+		unset($return['user']['session_key']);
+		unset($return['user']['ip']);
+		unset($return['user']['awaiting']);
+		unset($return['user']['id']);
+		unset($return['user']['reg_date']);
+		unset($return['user']['last_login']);
+		unset($return['user']['user']);
+		unset($return['user']['pass']);
+		unset($return['user']['site_users_status']);
+		
+		$sql = 'SELECT * FROM sexos';
+		$result = db_query_array($sql);
+		
+		if ($result) {
+			foreach ($result as $row) {
+				$return['sexos'][$row['id']] = $row['name'];
+			}
+		}
+		
+		return $return;
+	}
 }
 
 ?>

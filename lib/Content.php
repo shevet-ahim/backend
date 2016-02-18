@@ -34,7 +34,6 @@ class Content{
 				content_cats.name AS category, 
 				GROUP_CONCAT(DISTINCT CONCAT_WS("|",torah_types.id,torah_types.name) SEPARATOR ",") AS topics,
 				sexos.name AS sexo,
-				content.site_users,
 				CONCAT_WS(" ",authors.first_name,authors.last_name) AS author_name,
 				CONCAT("authors","_",authors_files.f_id,"_",authors_files.id,"_small.",authors_files.ext) AS author_img,
 				authors.email AS author_email,
@@ -51,6 +50,7 @@ class Content{
 				LEFT JOIN sexos ON (sexos.id = content.sexo)
 				LEFT JOIN authors ON (authors.id = content.author)
 				LEFT JOIN authors_files ON (authors.id = authors_files.f_id)
+				LEFT JOIN content_site_users_relations ON (content.id = content_site_users_relations.f_id)
 				WHERE 1 ';
 		
 		if (is_array($topic) && count($topic) > 0) {
@@ -78,7 +78,7 @@ class Content{
 		if ($first_id > 0)
 			$sql .= ' AND content.id < '.$first_id.' ';
 		
-		$sql .= ' AND ((content.site_users LIKE "%{%" AND content.site_users LIKE "%'.User::$info['first_name'].' '.User::$info['last_name'].'%") OR content.site_users NOT LIKE "%{%")';
+		$sql .= ' AND (content_site_users_relations.value IS NULL OR content_site_users_relations.value = '.User::$info['id'].')';
 		$sql .= ' AND content.is_active = "Y" GROUP BY content.id ORDER BY content.date ASC';
 		
 		if ($per_page > 0)
