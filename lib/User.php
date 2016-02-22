@@ -99,7 +99,7 @@ class User {
 			$error_fields[] = 'pass';
 		}
 		
-		$result = db_query_array("SELECT site_users.*, site_users_status.key AS status, site_users_access.start AS `start`, site_users_access.last AS `last`, site_users_access.attempts AS attempts FROM site_users LEFT JOIN site_users_status ON (site_users.site_users_status = site_users_status.id) LEFT JOIN site_users_access ON (site_users_access.site_user = site_users.id) WHERE site_users.user = '$email1'");
+		$result = db_query_array("SELECT site_users.*, site_users_status.key AS status, site_users_access.start AS `start`, site_users_access.last AS `last`, site_users_access.attempts AS attempts FROM site_users LEFT JOIN site_users_status ON (site_users.site_users_status = site_users_status.id) LEFT JOIN site_users_access ON (site_users_access.site_user = site_users.id) WHERE site_users.email = '$email1'");
 		if (!$result) {
 			if (mb_strlen($email1) > 2) {
 				if ($ip_int) {
@@ -125,7 +125,7 @@ class User {
 			$invalid_login = 1;
 		}
 		elseif ($result) {
-			if (empty($result[0]['start']) || ($result[0]['start'] - time() >= 3600)) {
+			if (empty($result[0]['start']) || ($result[0]['start'] - time() >= 60)) {
 				$attempts = 1;
 				if ($result[0]['start'])
 					db_update('site_users_access',$result[0]['id'],array('attempts'=>'1','start'=>time(),'last'=>time()),'site_user');
@@ -134,8 +134,8 @@ class User {
 			}
 			else {
 				$attempts = $result[0]['attempts'] + 1;
-				$timeout = pow(2,$attempts);
-				$timeout_next = pow(2,$attempts + 1);
+				$timeout = pow(1.5,$attempts);
+				$timeout_next = pow(1.5,$attempts + 1);
 		
 				if ($attempts == 3) {
 					$CFG->language = ($result[0]['last_lang']) ? $result[0]['last_lang'] : 'en';
@@ -222,7 +222,7 @@ class User {
 		$email = SiteEmail::getRecord('update-settings');
 		Email::send($CFG->contact_email,$info['email'],$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$info);
 
-		return 'ok';
+		return array('messages'=>array('¡Su información ha sido actualizada!'));
 	}
 	
 	public static function savePassword($info) {
@@ -263,7 +263,7 @@ class User {
 		$email = SiteEmail::getRecord('update-password');
 		Email::send($CFG->contact_email,$info['email'],$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$info);
 	
-		return 'ok';
+		return array('messages'=>array('¡Su contraseña ha sido actualizada!'));
 	}
 	
 	public static function logOut($session_id=false) {
@@ -322,6 +322,18 @@ class User {
 	
 	public static function setInfo($info) {
 		User::$info = $info;
+	}
+	
+	public static function getUserStatus() {
+		$sql = 'SELECT * FROM site_users_status ';
+		$result = db_query_array($sql);
+		$return = array();
+		
+		foreach ($result as $row) {
+			$return[$row['id']] = $row;
+		}
+		
+		return $return;
 	}
 }
 ?>
