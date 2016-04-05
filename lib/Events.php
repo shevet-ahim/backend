@@ -1,6 +1,6 @@
 <?php 
 class Events{
-	public static function get($in_feed=false,$cats=false,$id=false,$recurrence=false,$age=false,$sex=false,$per_page=false,$start_date=false,$end_date=false,$day_he=false,$month_he=false,$last_id=false,$first_id=false) {
+	public static function get($in_feed=false,$cats=false,$id=false,$recurrence=false,$age=false,$sex=false,$per_page=false,$start_date=false,$end_date=false,$day_he=false,$month_he=false) {
 		global $CFG;
 
 		if (!$CFG->session_active)
@@ -13,24 +13,42 @@ class Events{
 		$month_he = preg_replace("/[^a-zA-Z0-9]/", "",$month_he);
 		$day_he = preg_replace("/[^0-9]/", "",$day_he);
 		$day_he = ($day_he > 0) ? $day_he : '0';
-		$last_id = preg_replace("/[^0-9]/", "",$last_id);
-		$first_id = preg_replace("/[^0-9]/", "",$first_id);
 		$recurrence = preg_replace("/[^a-zA-Z]/", "",$recurrence);
 		$age = preg_replace("/[^0-9]/", "",$age);
 		$sex = preg_replace("/[^0-9]/", "",$sex);
+		$days_of_week = array();
 		
 		if (strlen((string)$start_date) > 10)
 			$start_date = floor($start_date/1000);
 		if (strlen((string)$end_date) > 10)
 			$end_date = floor($end_date/1000);
+		/*
 		if (!$start_date)
 			$start_date = time();
+		*/
+		if (!$start_date)
+			$start_date = strtotime('- 30 days',time());
 		if (!$end_date)
-			$end_date = strtotime('+ '.$CFG->events_days_ahead.' days',$start_date);
+			$end_date = strtotime('+ '.$CFG->events_days_ahead.' days',time());
 		if ($start_date)
 			$start_heb = self::getJewishDate($start_date);
 		if ($end_date)
 			$end_heb = self::getJewishDate($end_date);
+		
+		if ($start_date && $end_date) {
+			$dw1 = date('w',$start_date);
+			$dw2 = date('w',$end_date);
+			$day_diff = floor(($end_date - $start_date)/(60*60*24));
+			
+			if ($day_diff >= 7)
+				$days_of_week = range(0,6);
+			else if ($dw1 < $dw2)
+				$days_of_week = range($dw1,$dw2);
+			else if ($dw1 > $dw2)
+				$days_of_week = array_merge(range($dw1,6),range(0,$dw2));
+			else if ($dw1 == $dw2)
+				$days_of_week = array($dw1);
+		}
 		
 		$sql = 'SELECT 
 				events.id, 
@@ -46,9 +64,11 @@ class Events{
 				events_recurrence.key AS recurrence, 
 				event_cats.key, 
 				event_cats.name AS category,
+				event_cats1.key AS p_key,
 				event_cats1.name AS p_category,
 				IF(events_recurrence.key = "recurrent",event_cats.show_in_feed_rec,event_cats.show_in_feed) AS show_in_feed, 
 				sexos.name AS sexo,
+				GROUP_CONCAT(DISTINCT days.key SEPARATOR ",") AS weekdays,
 				"event" AS `type`,
 				CONCAT("events","_",events_files.f_id,"_",events_files.id,"_large.",events_files.ext) AS img
 				FROM events
@@ -77,19 +97,13 @@ class Events{
 			$sql .= ' AND (event_cats.key = "'.$cats.'" OR event_cats1.key = "'.$cats.'")';
 		
 		if ($start_date > 0 && $end_date > 0)
-			$sql .= ' AND ((events_recurrence.key = "specific_greg" AND DATE(events.date) >= "'.date('Y-m-d',$start_date).'" AND DATE(events.date) <= "'.date('Y-m-d',$end_date).'") OR (events_recurrence.key = "specific_heb" AND ((month_he = '.$start_heb[1].' AND day_he >= '.$start_heb[0].') OR (month_he > '.$start_heb[1].' OR month_he < '.$end_heb[1].') OR (month_he = '.$end_heb[1].' AND day_he <= '.$end_heb[0].'))) OR events_recurrence.key = "recurrent") ';
+			$sql .= ' AND ((events_recurrence.key = "specific_greg" AND DATE(events.date) >= "'.date('Y-m-d',$start_date).'" AND DATE(events.date) <= "'.date('Y-m-d',$end_date).'") OR (events_recurrence.key = "specific_heb" AND ((month_he = '.$start_heb[1].' AND day_he >= '.$start_heb[0].') OR (month_he > '.$start_heb[1].' OR month_he < '.$end_heb[1].') OR (month_he = '.$end_heb[1].' AND day_he <= '.$end_heb[0].'))) OR (events_recurrence.key = "recurrent" '.((count($days_of_week) > 0) ? 'AND days.key IN ('.implode(',',$days_of_week).')' : '').')) ';
 		if ($day_he > 0 && $month_he > 0)
 			$sql .= ' AND (he_months.key = "'.$month_he.'" AND day_he = '.$day_he.') ';
 		if ($age > 0)
-			$sql .= ' AND ((age_groups.min <= '.$age.' AND age_groups.max >= '.$age.') '.($in_feed ? ' OR age_groups.min IS NULL' : '').') ';
+			$sql .= ' AND ((age_groups.min <= '.$age.' AND age_groups.max >= '.$age.') OR age_groups.min IS NULL) ';
 		if ($sex > 0)
 			$sql .= ' AND (events.sexo = '.$sex.' OR events.sexo = 0) ';
-		if ($id > 0)
-			$sql .= ' AND events.id = '.$id.' ';
-		if ($last_id > 0)
-			$sql .= ' AND events.id > '.$last_id.' ';
-		if ($first_id > 0)
-			$sql .= ' AND events.id < '.$first_id.' ';
 		if ($in_feed)
 			$sql .= ' AND event_cats.show_in_feed = "Y" ';
 		

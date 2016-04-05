@@ -88,6 +88,9 @@ class User {
 		$email1 = preg_replace("/[^0-9a-zA-Z@\.\!#\$%\&\*+_\~\?\-]/","",$info['email']);
 		$pass1 = preg_replace($CFG->pass_regex,"",$info['pass']);
 		$ip1 = self::getUserIp();
+		$ip_int = false;
+		$attempts = false;
+		$timeout_next = false;
 		
 		if (!$email1) {
 			$errors[] = 'Email en blanco!';

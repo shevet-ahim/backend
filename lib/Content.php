@@ -1,6 +1,6 @@
 <?php
 class Content{
-	public static function get($cats=false,$topic=false,$age=false,$sex=false,$per_page=false,$start_date=false,$end_date=false,$last_id=false,$first_id=false){
+	public static function get($cats=false,$topic=false,$age=false,$sex=false,$per_page=false,$start_date=false,$end_date=false){
 		global $CFG;
 		
 		if (!$CFG->session_active)
@@ -9,8 +9,6 @@ class Content{
 		$per_page = preg_replace("/[^0-9]/", "",$per_page);
 		$start_date = preg_replace("/[^0-9]/", "",$start_date);
 		$end_date = preg_replace("/[^0-9]/", "",$end_date);
-		$last_id = preg_replace("/[^0-9]/", "",$last_id);
-		$first_id = preg_replace("/[^0-9]/", "",$first_id);
 		$age = preg_replace("/[^0-9]/", "",$age);
 		$sex = preg_replace("/[^0-9]/", "",$sex);
 		$topic = preg_replace("/[^0-9]/", "",$topic);
@@ -22,8 +20,11 @@ class Content{
 		if (!$end_date)
 			$end_date = time();
 		if (!$start_date)
+			$start_date = strtotime('- 30 days',$end_date);
+		/*
+		if (!$start_date)
 			$start_date = strtotime('- '.$CFG->events_days_ahead.' days',$end_date);
-		
+		*/
 		$sql = 'SELECT 
 				content.id, 
 				content.title,
@@ -73,10 +74,6 @@ class Content{
 			$sql .= ' AND ((age_groups.min >= '.$age.' AND age_groups.max <= '.$age.') OR age_groups.min IS NULL) ';
 		if ($sex > 0)
 			$sql .= ' AND (content.sexo = '.$sex.' OR content.sexo = 0) ';
-		if ($last_id > 0)
-			$sql .= ' AND content.id > '.$last_id.' ';
-		if ($first_id > 0)
-			$sql .= ' AND content.id < '.$first_id.' ';
 		
 		$sql .= ' AND (content_site_users_relations.value IS NULL OR content_site_users_relations.value = '.User::$info['id'].')';
 		$sql .= ' AND content.is_active = "Y" GROUP BY content.id ORDER BY content.date ASC';
