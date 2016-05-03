@@ -338,5 +338,28 @@ class User {
 		
 		return $return;
 	}
+	
+	public static function emergencyEmail($org,$lat,$long) {
+		global $CFG;
+		
+		if (!$org || !($org == 'hatzalah' || $org == 'dsi'))
+			return false;
+		
+		$info = array();
+		$info['name'] = User::$info['first_name'].' '.User::$info['last_name'];
+		$info['cel'] = User::$info['tel'];
+		$info['lat'] = $lat;
+		$info['long'] = $long;
+		
+		$contact = false;
+		if ($org == 'hatzalah')
+			$contact = $CFG->hatzalah_email;
+		else if ($org == 'dsi')
+			$contact = $CFG->dsi_email;
+		
+		$email = SiteEmail::getRecord('emergency');
+		Email::send($CFG->contact_email,$contact,$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$info);
+		return 'ok';
+	}
 }
 ?>

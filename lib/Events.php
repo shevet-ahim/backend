@@ -87,14 +87,16 @@ class Events{
 		if (is_array($cats) && count($cats) > 0) {
 			$c_arr = array();
 			foreach ($cats as $cat) {
-				$cat = preg_replace("/[^a-zA-Z0-9]/", "",$cat);
+				$cat = preg_replace("/[^a-zA-Z0-9\-\_]/", "",$cat);
 				$c_arr[] = '"'.$cat.'"';
 			}
 			
 			$sql .= ' AND (event_cats.key IN ('.implode(',',$c_arr).') OR event_cats1.key IN ('.implode(',',$c_arr).')) ';
 		}
-		else if ($cats)
+		else if ($cats) {
+			$cats = preg_replace("/[^a-zA-Z0-9\-\_]/", "",$cats);
 			$sql .= ' AND (event_cats.key = "'.$cats.'" OR event_cats1.key = "'.$cats.'")';
+		}
 		
 		if ($start_date > 0 && $end_date > 0)
 			$sql .= ' AND ((events_recurrence.key = "specific_greg" AND DATE(events.date) >= "'.date('Y-m-d',$start_date).'" AND DATE(events.date) <= "'.date('Y-m-d',$end_date).'") OR (events_recurrence.key = "specific_heb" AND ((month_he = '.$start_heb[1].' AND day_he >= '.$start_heb[0].') OR (month_he > '.$start_heb[1].' OR month_he < '.$end_heb[1].') OR (month_he = '.$end_heb[1].' AND day_he <= '.$end_heb[0].'))) OR (events_recurrence.key = "recurrent" '.((count($days_of_week) > 0) ? 'AND days.key IN ('.implode(',',$days_of_week).')' : '').')) ';
@@ -140,6 +142,25 @@ class Events{
 			$month = $months[$month_name];
 		
 		return array($day,$month,$year,$leap);
+	}
+	
+	public static function getCats(){
+		global $CFG;
+	
+		$sql = 'SELECT * FROM event_cats ORDER BY name ASC';
+		$result = db_query_array($sql);
+		$return = array();
+	
+		if ($result) {
+			foreach ($result as $row) {
+				if ($row['p_id'] == 0)
+					$return[$row['id']] = $row;
+				else
+					$return[$row['p_id']]['children'][] = $row;
+			}
+		}
+	
+		return $return;
 	}
 }
 ?>

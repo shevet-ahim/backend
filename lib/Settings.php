@@ -36,7 +36,7 @@ class Settings {
 	public static function getForApp() {
 		global $CFG;
 		
-		$return = array('user'=>array(),'sexos'=>array());
+		$return = array('user'=>array(),'sexos'=>array(),'content_cats'=>array(),'event_cats'=>array(),'hatzalah_phone'=>$CFG->hatzalah_phone,'dsi_phone'=>$CFG->dsi_phone);
 		
 		if (!empty(User::$info)) {
 			$return['user'] = User::$info;
@@ -63,6 +63,9 @@ class Settings {
 				$return['sexos'][$row['id']] = $row['name'];
 			}
 		}
+		
+		$return['content_cats'] = Content::getTopics();
+		$return['event_cats'] = Events::getCats();
 		
 		return $return;
 	}

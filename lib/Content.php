@@ -67,7 +67,7 @@ class Content{
 			$sql .= ' AND content_cats.key = "'.$cat.'"';
 		
 		if ($topic > 0)
-			$sql .= ' AND torah_types = '.$topic.' ';
+			$sql .= ' AND torah_types.id = '.$topic.' ';
 		if ($start_date > 0)
 			$sql .= ' AND (DATE(content.date) >= "'.date('Y-m-d',$start_date).'" AND DATE(content.date) <= "'.date('Y-m-d',$end_date).'") ';
 		if ($age > 0)
@@ -80,7 +80,7 @@ class Content{
 		
 		if ($per_page > 0)
 			$sql .= 'LIMIT 0,'.$per_page;
-		
+
 		return db_query_array($sql);
 	}
 	
@@ -116,5 +116,23 @@ class Content{
 		return false;				
 	}
 	
+	public static function getTopics(){
+		global $CFG;
+		
+		$sql = 'SELECT * FROM torah_types ORDER BY name ASC';
+		$result = db_query_array($sql);
+		$return = array();
+		
+		if ($result) {
+			foreach ($result as $row) {
+				if ($row['p_id'] == 0)
+					$return[$row['id']] = $row;
+				else
+					$return[$row['p_id']]['children'][] = $row;
+			}
+		}
+		
+		return $return;
+	}
 }
 ?>
