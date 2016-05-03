@@ -30,4 +30,7 @@ $CFG->self = basename($_SERVER['SCRIPT_FILENAME']);
 $CFG->user_status_approved = 1;
 $CFG->user_status_rejected = 2;
 $CFG->user_status_pending = 3;
+
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST');
 ?>
