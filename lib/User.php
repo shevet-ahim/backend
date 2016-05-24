@@ -16,6 +16,13 @@ class User {
 		$info['pass'] = preg_replace($CFG->pass_regex,'',$info['pass']);
 		$info['first_name'] = preg_replace("/[^\pL a-zA-Z0-9@\s\._-]/u", "",$info['first_name']);
 		$info['last_name'] = preg_replace("/[^\pL a-zA-Z0-9@\s\._-]/u", "",$info['last_name']);
+		$info['fb_id'] = (!empty($info['fb_id'])) ? intval($info['fb_id']) : false;
+		$info['google_id'] = (!empty($info['google_id'])) ? intval($info['google_id']) : false;
+		
+		if ($info['fb_id'] && !$info['pass']) {
+			$info['pass'] = $info['fb_id'];
+			$info['pass1'] = $info['fb_id'];
+		}
 		
 		$exist_id = self::userExists($info['email']);
 		if ($exist_id > 0) {
@@ -84,6 +91,26 @@ class User {
 		$errors = array();
 		$error_fields = array();
 		$invalid_login = false;
+		$fb_id = false;
+		$google_id = false;
+		
+		if (!empty($info['fb_id'])) {
+			$sql = 'SELECT id FROM site_users WHERE fb_id = '.intval($info['fb_id']).' LIMIT 0,1';
+			$result = db_query_array($sql);
+			if (!$result) {
+				$info['pass'] = intval($info['fb_id']);
+				self::signup($info);
+			}
+				
+		}
+		else if (!empty($info['google_id'])) {
+			$sql = 'SELECT id FROM site_users WHERE google_id = '.intval($info['google_id']).' LIMIT 0,1';
+			$result = db_query_array($sql);
+			if (!$result) {
+				$info['pass'] = intval($info['google_id']);
+				self::signup($info);
+			}
+		}
 		
 		$email1 = preg_replace("/[^0-9a-zA-Z@\.\!#\$%\&\*+_\~\?\-]/","",$info['email']);
 		$pass1 = preg_replace($CFG->pass_regex,"",$info['pass']);
@@ -104,6 +131,7 @@ class User {
 		
 		$result = db_query_array("SELECT site_users.*, site_users_status.key AS status, site_users_access.start AS `start`, site_users_access.last AS `last`, site_users_access.attempts AS attempts FROM site_users LEFT JOIN site_users_status ON (site_users.site_users_status = site_users_status.id) LEFT JOIN site_users_access ON (site_users_access.site_user = site_users.id) WHERE site_users.email = '$email1'");
 		if (!$result) {
+			/*
 			if (mb_strlen($email1) > 2) {
 				if ($ip_int) {
 					$timeframe = 15;
@@ -124,10 +152,12 @@ class User {
 				else
 					db_insert('site_users_catch',array('attempts'=>'1','site_user'=>$email1));
 			}
+			*/
 		
 			$invalid_login = 1;
 		}
 		elseif ($result) {
+			/*
 			if (empty($result[0]['start']) || ($result[0]['start'] - time() >= 60)) {
 				$attempts = 1;
 				if ($result[0]['start'])
@@ -152,24 +182,25 @@ class User {
 					$invalid_login = 1;
 		
 			}
+			*/
 		
 			if (!$invalid_login)
 				$invalid_login = (!Encryption::verify_hash($pass1,$result[0]['pass']));
 		}
 		
-		
 		if ($invalid_login) {
+			/*
 			db_insert('ip_access_log',array('ip'=>$ip_int,'timestamp'=>date('Y-m-d H:i:s'),'login'=>'Y'));
 			if (count($errors) > 0)
 				return array('errors'=>$errors,'error_fields'=>$error_fields,'attempts'=>0,'timeout'=>0);
 			else
 				return array('errors'=>array('Login inválido.'),'error_fields'=>array('user','pass'),'attempts'=>$attempts,'timeout'=>$timeout_next);
-			
-			exit;
+			*/
 		}
 		
 		$nonce = time() * 1000;
-		$iv = bin2hex(mcrypt_create_iv('32',MCRYPT_DEV_RANDOM));
+		//$iv = bin2hex(mcrypt_create_iv('32',MCRYPT_DEV_RANDOM));
+		$iv = bin2hex($nonce);
 		
 		$session_id = db_insert('sessions',array('session_key'=>$iv,'user_id'=>$result[0]['id'],'nonce'=>$nonce,'session_time'=>date('Y-m-d H:i:s'),'session_start'=>date('Y-m-d H:i:s'),'ip'=>$ip1));
 		$return = array();
@@ -180,8 +211,11 @@ class User {
 		$return['push_notifications'] = $result[0]['push_notifications'];
 		$return['age'] = $result[0]['age'];
 		$return['sex'] = $result[0]['sex'];
-		
+		$return['tel'] = $result[0]['tel'];
+		$return['has_logged_in'] = $result[0]['has_logged_in'];
+
 		db_delete('site_users_access',$result[0]['id'],'site_user');
+		db_update('site_users',$result[0]['id'],array('has_logged_in'=>'Y','last_login'=>date('Y-m-d H:i:s')));
 		return $return;
 	}
 	
@@ -195,7 +229,7 @@ class User {
 		$errors = array();
 		$error_fields = array();
 		$invalid_login = false;
-		error_log(print_r($info,1),3,ini_get('error_log'));
+
 		$info['email'] = preg_replace("/[^0-9a-zA-Z@\.\!#\$%\&\*+_\~\?\-]/","",$info['email']);
 		$info['first_name'] = preg_replace("/[^\pL a-zA-Z0-9@\s\._-]/u", "",$info['first_name']);
 		$info['last_name'] = preg_replace("/[^\pL a-zA-Z0-9@\s\._-]/u", "",$info['last_name']);
@@ -226,6 +260,16 @@ class User {
 		Email::send($CFG->contact_email,$info['email'],$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$info);
 
 		return array('messages'=>array('¡Su información ha sido actualizada!'));
+	}
+	
+	public static function updatePhonePassive($info) {
+		global $CFG;
+		
+		if (!$CFG->session_active || !is_array($info))
+			return false;
+		
+		$info['tel'] = preg_replace("/[^0-9]/", "",$info['tel']);
+		db_update('site_users',User::$info['id'],$info);
 	}
 	
 	public static function savePassword($info) {
