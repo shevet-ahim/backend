@@ -99,7 +99,7 @@ class Events{
 		}
 		
 		if ($start_date > 0 && $end_date > 0)
-			$sql .= ' AND ((events_recurrence.key = "specific_greg" AND DATE(events.date) >= "'.date('Y-m-d',$start_date).'" AND DATE(events.date) <= "'.date('Y-m-d',$end_date).'") OR (events_recurrence.key = "specific_heb" AND ((month_he = '.$start_heb[1].' AND day_he >= '.$start_heb[0].') OR (month_he > '.$start_heb[1].' OR month_he < '.$end_heb[1].') OR (month_he = '.$end_heb[1].' AND day_he <= '.$end_heb[0].'))) OR (events_recurrence.key = "recurrent" '.((count($days_of_week) > 0) ? 'AND days.key IN ('.implode(',',$days_of_week).')' : '').')) ';
+			$sql .= ' AND ((events_recurrence.key = "specific_greg" AND DATE(events.date) >= "'.date('Y-m-d',$start_date).'" AND DATE(events.date) <= "'.date('Y-m-d',$end_date).'") OR (events_recurrence.key = "specific_heb" AND ((month_he = '.$start_heb[1].' AND day_he >= '.$start_heb[0].') OR (month_he = '.$end_heb[1].' AND day_he <= '.$end_heb[0].'))) OR (events_recurrence.key = "recurrent" '.((count($days_of_week) > 0) ? 'AND days.key IN ('.implode(',',$days_of_week).')' : '').')) ';
 		if ($day_he > 0 && $month_he > 0)
 			$sql .= ' AND (he_months.key = "'.$month_he.'" AND day_he = '.$day_he.') ';
 		if ($age > 0)
@@ -118,7 +118,7 @@ class Events{
 		
 		if ($per_page > 0)
 			$sql .= 'LIMIT 0,'.$per_page;
-
+		//error_log(print_r(array($sql),1),3,ini_get('error_log'));
 		$result = db_query_array($sql);
 		if ($id > 0 && $result)
 			return $result[0];
