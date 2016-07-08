@@ -129,7 +129,7 @@ class User {
 			$error_fields[] = 'pass';
 		}
 		
-		$result = db_query_array("SELECT site_users.*, site_users_status.key AS status, site_users_access.start AS `start`, site_users_access.last AS `last`, site_users_access.attempts AS attempts FROM site_users LEFT JOIN site_users_status ON (site_users.site_users_status = site_users_status.id) LEFT JOIN site_users_access ON (site_users_access.site_user = site_users.id) WHERE site_users.email = '$email1'");
+		$result = db_query_array("SELECT site_users.*, site_users_status.key AS status, site_users_access.start AS `start`, site_users_access.last AS `last`, site_users_access.attempts AS attempts FROM site_users LEFT JOIN site_users_status ON (site_users.site_users_status = site_users_status.id) LEFT JOIN site_users_access ON (site_users_access.site_user = site_users.id) WHERE LOWER(site_users.email) = '".strtolower($email1)."'");
 		if (!$result) {
 			/*
 			if (mb_strlen($email1) > 2) {
@@ -329,7 +329,7 @@ class User {
 		if (!$email)
 			return false;
 	
-		$sql = "SELECT id FROM site_users WHERE email = '$email'";
+		$sql = "SELECT id FROM site_users WHERE LOWER(email) = '".strtolower($email)."'";
 		$result = db_query_array($sql);
 	
 		if ($result)
