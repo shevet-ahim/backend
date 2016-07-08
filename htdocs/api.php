@@ -44,7 +44,7 @@ if ($session_id1) {
 	if ($CFG->memcached) {
 		$cached = $CFG->m->get('session_'.$session_id1);
 		if ($cached && ($nonce1 >= ($cached['nonce'] + 5) || $nonce1 <= ($cached['nonce'] - 5))) {
-			$nonce_invalid = true;
+			//$nonce_invalid = true;
 		}
 	}
 	
