@@ -196,6 +196,7 @@ class User {
 			else
 				return array('errors'=>array('Login inválido.'),'error_fields'=>array('user','pass'),'attempts'=>$attempts,'timeout'=>$timeout_next);
 			*/
+			return array('errors'=>array('Login inválido.'),'error_fields'=>array('user','pass'),'attempts'=>0,'timeout'=>0);
 		}
 		
 		$nonce = time() * 1000;
