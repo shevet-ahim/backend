@@ -19,7 +19,7 @@ class User {
 		$info['fb_id'] = (!empty($info['fb_id'])) ? intval($info['fb_id']) : false;
 		$info['google_id'] = (!empty($info['google_id'])) ? intval($info['google_id']) : false;
 		
-		if ($info['fb_id'] && !$info['pass']) {
+		if ($info['fb_id']) {
 			$info['pass'] = $info['fb_id'];
 			$info['pass1'] = $info['fb_id'];
 		}
