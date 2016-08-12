@@ -68,6 +68,8 @@ class Events{
 				event_cats1.name AS p_category,
 				IF(events_recurrence.key = "recurrent",event_cats.show_in_feed_rec,event_cats.show_in_feed) AS show_in_feed, 
 				sexos.name AS sexo,
+				CONCAT_WS(" ",authors.first_name,authors.last_name) AS author_name,
+				CONCAT("authors","_",authors_files.f_id,"_",authors_files.id,"_small.",authors_files.ext) AS author_img,
 				GROUP_CONCAT(DISTINCT days.key SEPARATOR ",") AS weekdays,
 				"event" AS `type`,
 				CONCAT("events","_",events_files.f_id,"_",events_files.id,"_large.",events_files.ext) AS img
@@ -81,6 +83,8 @@ class Events{
 				LEFT JOIN events_age_groups ON (events_age_groups.f_id = events.id)
 				LEFT JOIN age_groups ON (events_age_groups.c_id = age_groups.id)
 				LEFT JOIN sexos ON (sexos.id = events.sexo)
+				LEFT JOIN authors ON (authors.id = events.author)
+				LEFT JOIN authors_files ON (authors.id = authors_files.f_id)
 				LEFT JOIN events_files ON (events.id = events_files.f_id)
 				WHERE 1 ';
 		
