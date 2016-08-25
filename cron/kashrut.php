@@ -7,7 +7,6 @@ mb_internal_encoding('UTF-8');
 $kashrut_url = 'http://kasherpanama.com/';
 
 // get products from kashrut site
-/*
 $ch = curl_init($kashrut_url.'/lista-kosher/');
 curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
 curl_setopt($ch,CURLOPT_POSTFIELDS,array());
@@ -100,7 +99,6 @@ if ($products) {
 		db_query($sql);
 	}
 }
-*/
 
 // get restaurants from kashrut site
 $ch = curl_init($kashrut_url.'/wp-admin/admin-ajax.php');
