@@ -71,12 +71,12 @@ class User {
 		$record_id = db_insert('site_users',$info);
 		$info['pass'] = $pass1;
 		$email = SiteEmail::getRecord('register');
-		Email::send($CFG->contact_email,$info['email'],$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$info);
+		Email::send($CFG->contact_email,$info['email'],$email['title'],$CFG->form_email_from,false,$email['content'],$info);
 
 		if ($CFG->email_notify_new_users) {
 			$email = SiteEmail::getRecord('register-notify');
 			$info['pass'] = false;
-			Email::send($CFG->contact_email,$CFG->contact_email,$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$info);
+			Email::send($CFG->contact_email,$CFG->contact_email,$email['title'],$CFG->form_email_from,false,$email['content'],$info);
 		}
 		return $status;	
 	}
@@ -173,7 +173,7 @@ class User {
 				if ($attempts == 3) {
 					$CFG->language = ($result[0]['last_lang']) ? $result[0]['last_lang'] : 'en';
 					$email = SiteEmail::getRecord('bruteforce-notify');
-					Email::send($CFG->support_email,$result[0]['email'],$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$result[0]);
+					Email::send($CFG->support_email,$result[0]['email'],$email['title'],$CFG->form_email_from,false,$email['content'],$result[0]);
 				}
 		
 				db_update('site_users_access',$result[0]['id'],array('attempts'=>$attempts,'last'=>time()),'site_user');
@@ -258,7 +258,7 @@ class User {
 		
 		db_update('site_users',User::$info['id'],$info);
 		$email = SiteEmail::getRecord('update-settings');
-		Email::send($CFG->contact_email,$info['email'],$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$info);
+		Email::send($CFG->contact_email,$info['email'],$email['title'],$CFG->form_email_from,false,$email['content'],$info);
 
 		return array('messages'=>array('¡Su información ha sido actualizada!'));
 	}
@@ -309,7 +309,7 @@ class User {
 	
 		db_update('site_users',User::$info['id'],array('pass'=>Encryption::hash($info['pass'])));
 		$email = SiteEmail::getRecord('update-password');
-		Email::send($CFG->contact_email,$info['email'],$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$info);
+		Email::send($CFG->contact_email,$info['email'],$email['title'],$CFG->form_email_from,false,$email['content'],$info);
 	
 		return array('messages'=>array('¡Su contraseña ha sido actualizada!'));
 	}
@@ -403,7 +403,7 @@ class User {
 			$contact = $CFG->dsi_email;
 		
 		$email = SiteEmail::getRecord('emergency');
-		Email::send($CFG->contact_email,$contact,$email['title'],$CFG->email_smtp_send_from,false,$email['content'],$info);
+		Email::send($CFG->contact_email,$contact,$email['title'],$CFG->form_email_from,false,$email['content'],$info);
 		return 'ok';
 	}
 }

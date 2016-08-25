@@ -26,11 +26,12 @@ class Email {
 		}
 
 		if (!$text_version) {
-			include_once 'html2text.php';
+			include_once 'Html2Text.php';
 			
-			$h2t = new html2text($html_version); 
+			$h2t = new \Html2Text\Html2Text($html_version); 
 			$h2t->set_base_url($CFG->baseurl);
 			$text_version = $h2t->get_text();
+			
 		}
 		
 		if (!$html_version) {

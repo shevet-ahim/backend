@@ -22,6 +22,7 @@ class Shlijim {
 				LEFT JOIN shlijim_visit_reg ON (shlijim_visit_reg.shlijim_id = shlijim.id AND shlijim_visit_reg.date_start <= CURDATE() AND shlijim_visit_reg.date_end >= CURDATE())
 				LEFT JOIN shlijim_status ON (shlijim_visit_reg.status = shlijim_status.id)
 				LEFT JOIN shlijim_files ON (shlijim.id = shlijim_files.f_id)
+				WHERE shlijim_status.key IS NOT NULL
 				GROUP BY shlijim.id ORDER BY shlijim.last_name ASC';
 		
 		return db_query_array($sql);

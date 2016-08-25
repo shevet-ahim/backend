@@ -7,23 +7,26 @@ class Dir {
 		if (!$CFG->session_active)
 			return false;
 		
+		//GROUP_CONCAT(DISTINCT CONCAT_WS("|",directory_schedule.start,directory_schedule.end) SEPARATOR ",") AS times
+		//LEFT JOIN directory_schedule ON (directory_schedule.directory_id = directory_schedule.id)
+		
 		$sql = 'SELECT 
 				directory.id,
 				directory.name,
+				directory.tel,
 				directory.email,
 				directory.website,
+				directory.address,
 				directory.warn,
 				directory.content,
 				directory_cats.key, 
 				directory_cats.name AS category,
 				"directory" AS type, 
-				GROUP_CONCAT(DISTINCT CONCAT_WS("|",restaurant_cats.id,restaurant_cats.name) SEPARATOR ",") AS restaurant_categories,
-				GROUP_CONCAT(DISTINCT CONCAT_WS("|",directory_schedule.start,directory_schedule.end) SEPARATOR ",") AS times
+				GROUP_CONCAT(DISTINCT CONCAT_WS("|",restaurant_cats.id,restaurant_cats.name) SEPARATOR ",") AS restaurant_categories
 				FROM directory
 				LEFT JOIN directory_cats ON (directory.directory_cat = directory_cats.id)
 				LEFT JOIN directory_restaurant_cats ON (directory_restaurant_cats.f_id = directory.id)
 				LEFT JOIN restaurant_cats ON (directory_restaurant_cats.c_id = restaurant_cats.id)
-				LEFT JOIN directory_schedule ON (directory_schedule.directory_id = directory_schedule.id)
 				WHERE 1 ';
 		
 		if (is_array($cats) && count($cats) > 0) {
