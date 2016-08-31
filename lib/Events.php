@@ -54,7 +54,6 @@ class Events{
 				events.id, 
 				events.title, 
 				events.place, 
-				events.place_abbr,
 				events.content, 
 				events.date, 
 				events.time, 
