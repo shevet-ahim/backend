@@ -63,11 +63,11 @@ class Content{
 				
 			$sql .= ' AND content_cats.key IN ('.implode(',',$c_arr).') ';
 		}
-		else if ($cats)
-			$sql .= ' AND content_cats.key = "'.$cat.'"';
+		else if ($topic)
+			$sql .= ' AND content_cats.key = "'.$topic.'"';
 		
-		if ($topic > 0)
-			$sql .= ' AND torah_types.id = '.$topic.' ';
+		if ($cats)
+			$sql .= ' AND torah_types.id = "'.$cats.'" ';
 		if ($start_date > 0)
 			$sql .= ' AND (DATE(content.date) >= "'.date('Y-m-d',$start_date).'" AND DATE(content.date) <= "'.date('Y-m-d',$end_date).'") ';
 		if ($age > 0)
@@ -80,7 +80,7 @@ class Content{
 		
 		if ($per_page > 0)
 			$sql .= 'LIMIT 0,'.$per_page;
-
+		
 		return db_query_array($sql);
 	}
 	

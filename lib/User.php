@@ -97,6 +97,7 @@ class User {
 		if (!empty($info['fb_id'])) {
 			$sql = 'SELECT id FROM site_users WHERE fb_id = '.intval($info['fb_id']).' LIMIT 0,1';
 			$result = db_query_array($sql);
+			
 			if (!$result) {
 				$info['pass'] = intval($info['fb_id']);
 				self::signup($info);
