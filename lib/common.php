@@ -3,6 +3,7 @@
 include '../cfg/cfg.php';
 include '../lib/dblib.php';
 include '../lib/stdlib.php';
+include '../lib/simple_html_dom.php';
 include '../lib/autoload.php';
 
 /* Connect to DB */

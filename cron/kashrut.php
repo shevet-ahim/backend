@@ -1,7 +1,6 @@
 #!/usr/bin/php
 <?php 
 include '../lib/common.php';
-include '../lib/simple_html_dom.php';
 mb_internal_encoding('UTF-8');
 
 $kashrut_url = 'http://kasherpanama.com/';
