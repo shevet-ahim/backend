@@ -1,5 +1,10 @@
 #!/usr/bin/php
 <?php 
+
+$fp = explode('/',__FILE__);
+array_pop($fp);
+chdir(implode('/',$fp));
+
 include '../lib/common.php';
 
 // send welcome email to approved users
