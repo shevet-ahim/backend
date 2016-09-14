@@ -99,10 +99,10 @@ class User {
 			$result = db_query_array($sql);
 			
 			if (!$result) {
-				$info['pass'] = intval($info['fb_id']);
 				self::signup($info);
 			}
-				
+
+			$info['pass'] = intval($info['fb_id']);
 		}
 		else if (!empty($info['google_id'])) {
 			$sql = 'SELECT id FROM site_users WHERE google_id = '.intval($info['google_id']).' LIMIT 0,1';
