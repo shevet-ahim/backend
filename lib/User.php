@@ -108,9 +108,10 @@ class User {
 			$sql = 'SELECT id FROM site_users WHERE google_id = '.intval($info['google_id']).' LIMIT 0,1';
 			$result = db_query_array($sql);
 			if (!$result) {
-				$info['pass'] = intval($info['google_id']);
 				self::signup($info);
 			}
+			
+			$info['pass'] = intval($info['google_id']);
 		}
 		
 		$email1 = preg_replace("/[^0-9a-zA-Z@\.\!#\$%\&\*+_\~\?\-]/","",$info['email']);
