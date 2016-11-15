@@ -18,7 +18,7 @@ class DateOverrides {
 				'mincha_ketana'=>strtotime($row['date'].' '.substr($row['minha_ketana'],strrpos($row['minha_ketana'],' ') + 1)) * 1000,
 				'shkiah'=>strtotime($row['date'].' '.substr($row['shekia'],strrpos($row['shekia'],' ') + 1)) * 1000,
 				'tzeit'=>strtotime($row['date'].' '.substr($row['tzet'],strrpos($row['tzet'],' ') + 1)) * 1000,
-				'candles'=>(($row['candles'] > 0) ? strtotime($row['date'].' '.substr($row['candles'],strrpos($row['candles'],' ') + 1)) : 0)) * 1000;
+				'candles'=>(($row['candles'] > 0) ? strtotime($row['date'].' '.substr($row['candles'],strrpos($row['candles'],' ') + 1)) * 1000 : 0));
 		}
 		
 		return $return;
