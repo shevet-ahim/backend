@@ -11,14 +11,14 @@ class DateOverrides {
 		foreach ($result as $row) {
 			
 			$return[$row['date']] = array(
-				'netz'=>strtotime($row['date'].' '.substr($row['netz'],strrpos($row['netz'],' ') + 1)),
-				'shema'=>strtotime($row['date'].' '.substr($row['shema'],strrpos($row['shema'],' ') + 1)),
-				'tefilah'=>strtotime($row['date'].' '.substr($row['tefilah'],strrpos($row['tefilah'],' ') + 1)),
-				'minha_gedola'=>strtotime($row['date'].' '.substr($row['minha_gedola'],strrpos($row['minha_gedola'],' ') + 1)),
-				'minha_ketana'=>strtotime($row['date'].' '.substr($row['minha_ketana'],strrpos($row['minha_ketana'],' ') + 1)),
-				'shekia'=>strtotime($row['date'].' '.substr($row['shekia'],strrpos($row['shekia'],' ') + 1)),
-				'tzet'=>strtotime($row['date'].' '.substr($row['tzet'],strrpos($row['tzet'],' ') + 1)),
-				'candles'=>(($row['candles'] > 0) ? strtotime($row['date'].' '.substr($row['candles'],strrpos($row['candles'],' ') + 1)) : 0));
+				'neitz_hachama'=>strtotime($row['date'].' '.substr($row['netz'],strrpos($row['netz'],' ') + 1)) * 1000,
+				'sof_zman_shma'=>strtotime($row['date'].' '.substr($row['shema'],strrpos($row['shema'],' ') + 1)) * 1000,
+				'sof_zman_tfilla'=>strtotime($row['date'].' '.substr($row['tefilah'],strrpos($row['tefilah'],' ') + 1)) * 1000,
+				'mincha_gedola'=>strtotime($row['date'].' '.substr($row['minha_gedola'],strrpos($row['minha_gedola'],' ') + 1)) * 1000,
+				'mincha_ketana'=>strtotime($row['date'].' '.substr($row['minha_ketana'],strrpos($row['minha_ketana'],' ') + 1)) * 1000,
+				'shkiah'=>strtotime($row['date'].' '.substr($row['shekia'],strrpos($row['shekia'],' ') + 1)) * 1000,
+				'tzeit'=>strtotime($row['date'].' '.substr($row['tzet'],strrpos($row['tzet'],' ') + 1)) * 1000,
+				'candles'=>(($row['candles'] > 0) ? strtotime($row['date'].' '.substr($row['candles'],strrpos($row['candles'],' ') + 1)) : 0)) * 1000;
 		}
 		
 		return $return;
