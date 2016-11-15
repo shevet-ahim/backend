@@ -1,7 +1,7 @@
 <?php
 class DateOverrides {
 	public static function get() {
-		$sql = 'SELECT * FROM date_overrides WHERE `date` >= '.date('Y-m-d',strtotime('-1 month')).' AND `date` <= '.date('Y-m-d',strtotime('+1 month')).' ORDER BY `date` DESC';
+		$sql = 'SELECT * FROM date_overrides WHERE `date` >= "'.date('Y-m-d',strtotime('-1 month')).'" AND `date` <= "'.date('Y-m-d',strtotime('+1 month')).'" ORDER BY `date` DESC';
 		$result = db_query_array($sql);
 		
 		if (!$result)
