@@ -2,10 +2,10 @@
 class Events{
 	public static function get($in_feed=false,$cats=false,$id=false,$recurrence=false,$age=false,$sex=false,$per_page=false,$start_date=false,$end_date=false,$day_he=false,$month_he=false) {
 		global $CFG;
-
+		/*
 		if (!$CFG->session_active)
 			return false;
-		
+		*/
 		$id = preg_replace("/[^0-9]/", "",$id);
 		$per_page = preg_replace("/[^0-9]/", "",$per_page);
 		$start_date = preg_replace("/[^0-9]/", "",$start_date);

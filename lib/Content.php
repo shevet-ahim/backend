@@ -2,10 +2,10 @@
 class Content{
 	public static function get($cats=false,$topic=false,$age=false,$sex=false,$per_page=false,$start_date=false,$end_date=false){
 		global $CFG;
-		
+		/*
 		if (!$CFG->session_active)
 			return false;
-		
+		*/
 		$per_page = preg_replace("/[^0-9]/", "",$per_page);
 		$start_date = preg_replace("/[^0-9]/", "",$start_date);
 		$end_date = preg_replace("/[^0-9]/", "",$end_date);
