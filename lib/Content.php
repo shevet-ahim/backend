@@ -75,7 +75,11 @@ class Content{
 		if ($sex > 0)
 			$sql .= ' AND (content.sexo = '.$sex.' OR content.sexo = 0) ';
 		
-		$sql .= ' AND (content_site_users_relations.value IS NULL OR content_site_users_relations.value = '.User::$info['id'].')';
+		if (!empty(User::$info['id']))
+			$sql .= ' AND (content_site_users_relations.value IS NULL OR content_site_users_relations.value = '.User::$info['id'].')';
+		else
+			$sql .= ' AND (content_site_users_relations.value IS NULL)';
+		
 		$sql .= ' AND content.is_active = "Y" GROUP BY content.id ORDER BY content.date ASC';
 		
 		if ($per_page > 0)
