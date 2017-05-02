@@ -239,7 +239,7 @@ class User {
 		$info['age'] = preg_replace("/[^0-9]/", "",$info['age']);
 		$info['sex'] = preg_replace("/[^0-9]/", "",$info['sex']);
 		$info['has_children'] = !empty($info['has_children']);
-		$info['push_notifications'] = !empty($info['push_notifications']);
+		$info['push_notifications'] = !empty($info['push_notifications']) ? 'Y' : 'N';
 		
 		if (empty($info['email']) || !Email::verifyAddress($info['email'])) {
 			$errors[] = 'Email no válido.';

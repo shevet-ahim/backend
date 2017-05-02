@@ -33,10 +33,10 @@ class Settings {
 		return $result[0];
 	}
 	
-	public static function getForApp() {
+	public static function getForApp($lat=false,$long=false) {
 		global $CFG;
 		
-		$return = array('user'=>array(),'sexos'=>array(),'content_cats'=>array(),'event_cats'=>array(),'hatzalah_phone'=>$CFG->hatzalah_phone,'dsi_phone'=>$CFG->dsi_phone);
+		$return = array('user'=>array(),'sexos'=>array(),'content_cats'=>array(),'event_cats'=>array(),'hatzalah_phone'=>$CFG->hatzalah_phone,'dsi_phone'=>$CFG->dsi_phone,'one_signal_app_id'=>$CFG->one_signal_app_id);
 		
 		if (!empty(User::$info)) {
 			$return['user'] = User::$info;
@@ -53,6 +53,13 @@ class Settings {
 			unset($return['user']['user']);
 			unset($return['user']['pass']);
 			unset($return['user']['site_users_status']);
+			
+			if ($lat) {
+				$lat = floatval($lat);
+				$long = floatval($long);
+				
+				db_update('site_users',User::$info['id'],array('lat'=>$lat,'long'=>$long));
+			}
 		}
 		
 		$sql = 'SELECT * FROM sexos';
