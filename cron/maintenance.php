@@ -28,14 +28,14 @@ if ($m1 != $m2) {
 	db_query($sql);
 }
 
-// send push notifications
-$sql = 'SELECT content FROM content WHERE is_popup = "Y" AND sent != "Y"';
+// send content notifications
+$sql = 'SELECT content.title as title FROM content WHERE is_popup = "Y" AND sent != "Y"';
 $result = db_query_array($sql);
 
 if ($result) {
 	foreach ($result as $item) {
 		$content = array(
-			"en" => $item['content']
+			"en" => $item['title']
 		);
 		
 		$fields = array(
@@ -57,10 +57,55 @@ if ($result) {
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 		
 		$response = curl_exec($ch);
+		
 		curl_close($ch);
 	}
 	
 	db_query('UPDATE content SET sent = "Y"');
+}
+
+// send event notifications
+if (date('i') == 0) {
+	$sql = 'SELECT events.title as title FROM events WHERE events.sent != "Y"';
+	$result = db_query_array($sql);
+	
+	if ($result) {
+		if (count($result) == 1) {
+			$item = $result[0];
+			$content = array(
+				"en" => $item['title']
+			);
+		}
+		else {
+			$content = array(
+				"en" => 'Hay '.count($result).' nuevos eventos.'
+			);
+		}
+		
+		$fields = array(
+			'app_id' => $CFG->one_signal_app_id,
+			'included_segments' => array('All'),
+			'data' => array(),
+			'contents' => $content
+		);
+		
+		$fields = json_encode($fields);
+		
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications");
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json; charset=utf-8','Authorization: Basic '.$CFG->one_signal_api_key));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_HEADER, FALSE);
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		
+		$response = curl_exec($ch);
+		
+		curl_close($ch);
+		
+		db_query('UPDATE events SET sent = "Y"');
+	}
 }
 
 ?>
