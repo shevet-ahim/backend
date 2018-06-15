@@ -14,81 +14,9 @@ class PushNotifications {
 	public function __construct() {
 		exit('Init function is not allowed');
 	}
-
-
-	// Sends Push notification function for OneSignal
-
-	function sendMessage($data) {
-	    
-
-	    $heading = array(
-		   "en" => $data['mtitle']
-		);
-
-	    $content      = array(
-	        "en" => $data['mdesc']
-	    );
-
-
-	    $hashes_array = array();
-	    array_push($hashes_array, array(
-	        "id" => "like-button",
-	        "text" => "Like",
-	        "icon" => "http://i.imgur.com/N8SN8ZS.png",
-	        "url" => "https://yoursite.com"
-	    ));
-	    array_push($hashes_array, array(
-	        "id" => "like-button-2",
-	        "text" => "Like2",
-	        "icon" => "http://i.imgur.com/N8SN8ZS.png",
-	        "url" => "https://yoursite.com"
-	    ));
-	    $fields = array(
-	        'app_id' => "03bcf763-bfef-4d8c-b94c-ede01f1e18a1",
-	        'included_segments' => array(
-	            'All'
-	        ),
-	        'data' => array(
-	            "foo" => "bar"
-	        ),
-	        'contents' => $content,
-	        'web_buttons' => $hashes_array
-	    );
-	    
-	    $fields = json_encode($fields);
-	    print("\nJSON sent:\n");
-	    print($fields);
-	    
-	    $ch = curl_init();
-	    curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications");
-	    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-	        'Content-Type: application/json; charset=utf-8',
-	        'Authorization: Basic YmUyZmI1YTMtYjk4My00ZTAzLWFlMmItZWE0OWEyZjNlZjdk'
-	    ));
-	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-	    curl_setopt($ch, CURLOPT_HEADER, FALSE);
-	    curl_setopt($ch, CURLOPT_POST, TRUE);
-	    curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
-	    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-	    
-	    $response = curl_exec($ch);
-	    curl_close($ch);
-	    
-	    return $response;
-	}
 	
-    
-    // Sends Push notification for Android users
+        // Sends Push notification for Android users
 	public function android($data, $reg_id,$api_access_key) {
-	        
-	        $response = $this->sendMessage($data);
-
-			$return["allresponses"] = $response;
-			$return = json_encode($return);
-
-			return $return;
-
-			/*
 	        $url = 'https://android.googleapis.com/gcm/send';
 	        $message = array(
 	            'title' => $data['mtitle'],
@@ -110,21 +38,10 @@ class PushNotifications {
 	        );
 	
 	    	return $this->useCurl($url, $headers, json_encode($fields));
-	    	*/
     	}
 	
 	// Sends Push's toast notification for Windows Phone 8 users
 	public function WP($data, $uri) {
-
-
-			$response = $this->sendMessage($data);
-
-			$return["allresponses"] = $response;
-			$return = json_encode($return);
-
-			return $return;
-
-		/*
 		$delay = 2;
 		$msg =  "<?xml version=\"1.0\" encoding=\"utf-8\"?>" .
 		        "<wp:Notification xmlns:wp=\"WPNotification\">" .
@@ -151,21 +68,11 @@ class PushNotifications {
 		}
 		
 		return $result;
-		*/
-
 	}
 	
         // Sends Push notification for iOS users
 	public function iOS($data, $devicetoken,$passphrase) {
 
-			$response = $this->sendMessage($data);
-
-			$return["allresponses"] = $response;
-			$return = json_encode($return);
-
-			return $return;
-
-		/*
 		$deviceToken = $devicetoken;
 
 		$ctx = stream_context_create();
@@ -206,7 +113,7 @@ class PushNotifications {
 			return 'Message not delivered' . PHP_EOL;
 		else
 			return 'Message successfully delivered' . PHP_EOL;
-		*/
+
 	}
 	
 	// Curl 
