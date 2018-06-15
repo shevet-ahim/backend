@@ -52,6 +52,7 @@ class PushNotifications {
 	            "foo" => "bar"
 	        ),
 	        'contents' => $content,
+	        'headings' => $heading,
 	        'web_buttons' => $hashes_array
 	    );
 	    
@@ -81,7 +82,7 @@ class PushNotifications {
     // Sends Push notification for Android users
 	public function android($data, $reg_id,$api_access_key) {
 	        
-	        $response = $this->sendMessage($data);
+	        $response = PushNotifications::sendMessage($data);
 
 			$return["allresponses"] = $response;
 			$return = json_encode($return);
@@ -117,7 +118,7 @@ class PushNotifications {
 	public function WP($data, $uri) {
 
 
-			$response = $this->sendMessage($data);
+			$response = PushNotifications::sendMessage($data);
 
 			$return["allresponses"] = $response;
 			$return = json_encode($return);
@@ -158,7 +159,7 @@ class PushNotifications {
         // Sends Push notification for iOS users
 	public function iOS($data, $devicetoken,$passphrase) {
 
-			$response = $this->sendMessage($data);
+			$response = PushNotifications::sendMessage($data);
 
 			$return["allresponses"] = $response;
 			$return = json_encode($return);
