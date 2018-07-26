@@ -62,7 +62,6 @@ class Events{
 				he_months.key AS month_he, 
 				events_recurrence.key AS recurrence, 
 				event_cats.key,
-				event_cats.source, 
 				event_cats.name AS category,
 				event_cats1.key AS p_key,
 				event_cats1.name AS p_category,
