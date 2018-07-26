@@ -32,6 +32,7 @@ class Content{
 				content.content, 
 				content.date, 
 				content_cats.key, 
+				content_cats.source,
 				content_cats.name AS category, 
 				GROUP_CONCAT(DISTINCT CONCAT_WS("|",torah_types.id,torah_types.name) SEPARATOR ",") AS topics,
 				sexos.name AS sexo,
